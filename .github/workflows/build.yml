@@ -1,0 +1,28 @@
+name: Build DUMRAUF.RU
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dumrauf-ru-build
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - run: cp deploy/.htaccess dist/.htaccess
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dumrauf-ru-production
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
